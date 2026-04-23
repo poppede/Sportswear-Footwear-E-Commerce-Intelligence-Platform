@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Claude Code Insights</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f8fafc; color: #334155; line-height: 1.65; padding: 48px 24px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+    h2 { font-size: 20px; font-weight: 600; color: #0f172a; margin-top: 48px; margin-bottom: 16px; }
+    .subtitle { color: #64748b; font-size: 15px; margin-bottom: 32px; }
+    .nav-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 32px 0; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .nav-toc a { font-size: 12px; color: #64748b; text-decoration: none; padding: 6px 12px; border-radius: 6px; background: #f1f5f9; transition: all 0.15s; }
+    .nav-toc a:hover { background: #e2e8f0; color: #334155; }
+    .stats-row { display: flex; gap: 24px; margin-bottom: 40px; padding: 20px 0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 24px; font-weight: 700; color: #0f172a; }
+    .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; }
+    .at-a-glance { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; padding: 20px 24px; margin-bottom: 32px; }
+    .glance-title { font-size: 16px; font-weight: 700; color: #92400e; margin-bottom: 16px; }
+    .glance-sections { display: flex; flex-direction: column; gap: 12px; }
+    .glance-section { font-size: 14px; color: #78350f; line-height: 1.6; }
+    .glance-section strong { color: #92400e; }
+    .see-more { color: #b45309; text-decoration: none; font-size: 13px; white-space: nowrap; }
+    .see-more:hover { text-decoration: underline; }
+    .project-areas { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .project-area { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+    .area-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .area-name { font-weight: 600; font-size: 15px; color: #0f172a; }
+    .area-count { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; }
+    .area-desc { font-size: 14px; color: #475569; line-height: 1.5; }
+    .narrative { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+    .narrative p { margin-bottom: 12px; font-size: 14px; color: #475569; line-height: 1.7; }
+    .key-insight { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: 14px; color: #166534; }
+    .section-intro { font-size: 14px; color: #64748b; margin-bottom: 16px; }
+    .big-wins { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .big-win { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; }
+    .big-win-title { font-weight: 600; font-size: 15px; color: #166534; margin-bottom: 8px; }
+    .big-win-desc { font-size: 14px; color: #15803d; line-height: 1.5; }
+    .friction-categories { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    .friction-category { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; }
+    .friction-title { font-weight: 600; font-size: 15px; color: #991b1b; margin-bottom: 6px; }
+    .friction-desc { font-size: 13px; color: #7f1d1d; margin-bottom: 10px; }
+    .friction-examples { margin: 0 0 0 20px; font-size: 13px; color: #334155; }
+    .friction-examples li { margin-bottom: 4px; }
+    .claude-md-section { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .claude-md-section h3 { font-size: 14px; font-weight: 600; color: #1e40af; margin: 0 0 12px 0; }
+    .claude-md-actions { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #dbeafe; }
+    .copy-all-btn { background: #2563eb; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .copy-all-btn:hover { background: #1d4ed8; }
+    .copy-all-btn.copied { background: #16a34a; }
+    .claude-md-item { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 10px 0; border-bottom: 1px solid #dbeafe; }
+    .claude-md-item:last-child { border-bottom: none; }
+    .cmd-checkbox { margin-top: 2px; }
+    .cmd-code { background: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; color: #1e40af; border: 1px solid #bfdbfe; font-family: monospace; display: block; white-space: pre-wrap; word-break: break-word; flex: 1; }
+    .cmd-why { font-size: 12px; color: #64748b; width: 100%; padding-left: 24px; margin-top: 4px; }
+    .features-section, .patterns-section { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+    .feature-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; }
+    .pattern-card { background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 16px; }
+    .feature-title, .pattern-title { font-weight: 600; font-size: 15px; color: #0f172a; margin-bottom: 6px; }
+    .feature-oneliner { font-size: 14px; color: #475569; margin-bottom: 8px; }
+    .pattern-summary { font-size: 14px; color: #475569; margin-bottom: 8px; }
+    .feature-why, .pattern-detail { font-size: 13px; color: #334155; line-height: 1.5; }
+    .feature-examples { margin-top: 12px; }
+    .feature-example { padding: 8px 0; border-top: 1px solid #d1fae5; }
+    .feature-example:first-child { border-top: none; }
+    .example-desc { font-size: 13px; color: #334155; margin-bottom: 6px; }
+    .example-code-row { display: flex; align-items: flex-start; gap: 8px; }
+    .example-code { flex: 1; background: #f1f5f9; padding: 8px 12px; border-radius: 4px; font-family: monospace; font-size: 12px; color: #334155; overflow-x: auto; white-space: pre-wrap; }
+    .copyable-prompt-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+    .copyable-prompt-row { display: flex; align-items: flex-start; gap: 8px; }
+    .copyable-prompt { flex: 1; background: #f8fafc; padding: 10px 12px; border-radius: 4px; font-family: monospace; font-size: 12px; color: #334155; border: 1px solid #e2e8f0; white-space: pre-wrap; line-height: 1.5; }
+    .feature-code { background: #f8fafc; padding: 12px; border-radius: 6px; margin-top: 12px; border: 1px solid #e2e8f0; display: flex; align-items: flex-start; gap: 8px; }
+    .feature-code code { flex: 1; font-family: monospace; font-size: 12px; color: #334155; white-space: pre-wrap; }
+    .pattern-prompt { background: #f8fafc; padding: 12px; border-radius: 6px; margin-top: 12px; border: 1px solid #e2e8f0; }
+    .pattern-prompt code { font-family: monospace; font-size: 12px; color: #334155; display: block; white-space: pre-wrap; margin-bottom: 8px; }
+    .prompt-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
+    .copy-btn { background: #e2e8f0; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: #475569; flex-shrink: 0; }
+    .copy-btn:hover { background: #cbd5e1; }
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+    .chart-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+    .chart-title { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 12px; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 6px; }
+    .bar-label { width: 100px; font-size: 11px; color: #475569; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; margin: 0 8px; }
+    .bar-fill { height: 100%; border-radius: 3px; }
+    .bar-value { width: 28px; font-size: 11px; font-weight: 500; color: #64748b; text-align: right; }
+    .empty { color: #94a3b8; font-size: 13px; }
+    .horizon-section { display: flex; flex-direction: column; gap: 16px; }
+    .horizon-card { background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%); border: 1px solid #c4b5fd; border-radius: 8px; padding: 16px; }
+    .horizon-title { font-weight: 600; font-size: 15px; color: #5b21b6; margin-bottom: 8px; }
+    .horizon-possible { font-size: 14px; color: #334155; margin-bottom: 10px; line-height: 1.5; }
+    .horizon-tip { font-size: 13px; color: #6b21a8; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 4px; }
+    .feedback-header { margin-top: 48px; color: #64748b; font-size: 16px; }
+    .feedback-intro { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+    .feedback-section { margin-top: 16px; }
+    .feedback-section h3 { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 12px; }
+    .feedback-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .feedback-card.team-card { background: #eff6ff; border-color: #bfdbfe; }
+    .feedback-card.model-card { background: #faf5ff; border-color: #e9d5ff; }
+    .feedback-title { font-weight: 600; font-size: 14px; color: #0f172a; margin-bottom: 6px; }
+    .feedback-detail { font-size: 13px; color: #475569; line-height: 1.5; }
+    .feedback-evidence { font-size: 12px; color: #64748b; margin-top: 8px; }
+    .fun-ending { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fbbf24; border-radius: 12px; padding: 24px; margin-top: 40px; text-align: center; }
+    .fun-headline { font-size: 18px; font-weight: 600; color: #78350f; margin-bottom: 8px; }
+    .fun-detail { font-size: 14px; color: #92400e; }
+    .collapsible-section { margin-top: 16px; }
+    .collapsible-header { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+    .collapsible-header h3 { margin: 0; font-size: 14px; font-weight: 600; color: #475569; }
+    .collapsible-arrow { font-size: 12px; color: #94a3b8; transition: transform 0.2s; }
+    .collapsible-content { display: none; padding-top: 16px; }
+    .collapsible-content.open { display: block; }
+    .collapsible-header.open .collapsible-arrow { transform: rotate(90deg); }
+    @media (max-width: 640px) { .charts-row { grid-template-columns: 1fr; } .stats-row { justify-content: center; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Claude Code Insights</h1>
+    <p class="subtitle">79 messages across 9 sessions (14 total) | 2026-03-26 to 2026-04-08</p>
+
+    
+    <div class="at-a-glance">
+      <div class="glance-title">At a Glance</div>
+      <div class="glance-sections">
+        <div class="glance-section"><strong>What's working:</strong> You&apos;re tackling ambitious, full-system builds — scaffolding 18-file pipelines from a single prompt and iterating on polished HTML dashboards until they match your vision. When API credits blocked execution, you adapted smartly by pivoting to local synthetic data and simulation approaches, keeping momentum going. <a href="#section-wins" class="see-more">Impressive Things You Did →</a></div>
+        <div class="glance-section"><strong>What's hindering you:</strong> On Claude&apos;s side, generated code frequently shipped with bugs (missing variables, broken downloads, wrong data distributions), creating frustrating multi-round fix cycles. On your side, jumping into complex pipeline builds before verifying API credits and credentials has been a recurring blocker — several sessions stalled entirely because keys were missing or underfunded, and trying nonexistent commands added unnecessary friction. <a href="#section-friction" class="see-more">Where Things Go Wrong →</a></div>
+        <div class="glance-section"><strong>Quick wins to try:</strong> Try creating a <strong>custom slash command</strong> (`/command`) that bundles your standard dashboard requirements (dark theme, color palette, layout priorities) so you don&apos;t have to re-specify them each session. Also, before wrapping up any build session, ask Claude to run a full smoke test or dry-run validation — this would catch many of the bugs that slipped through. <a href="#section-features" class="see-more">Features to Try →</a></div>
+        <div class="glance-section"><strong>Ambitious workflows:</strong> As models get more capable, expect Claude to generate test harnesses alongside each module automatically, catching bugs before you ever hit &apos;run&apos; instead of discovering them after building 18 files. You should also start designing all pipelines offline-first by default — better models will make it seamless to build with synthetic data locally and swap in real APIs as a one-line config change later. <a href="#section-horizon" class="see-more">On the Horizon →</a></div>
+      </div>
+    </div>
+    
+
+    <nav class="nav-toc">
+      <a href="#section-work">What You Work On</a>
+      <a href="#section-usage">How You Use CC</a>
+      <a href="#section-wins">Impressive Things</a>
+      <a href="#section-friction">Where Things Go Wrong</a>
+      <a href="#section-features">Features to Try</a>
+      <a href="#section-patterns">New Usage Patterns</a>
+      <a href="#section-horizon">On the Horizon</a>
+      <a href="#section-feedback">Team Feedback</a>
+    </nav>
+
+    <div class="stats-row">
+      <div class="stat"><div class="stat-value">79</div><div class="stat-label">Messages</div></div>
+      <div class="stat"><div class="stat-value">+13,469/-86</div><div class="stat-label">Lines</div></div>
+      <div class="stat"><div class="stat-value">45</div><div class="stat-label">Files</div></div>
+      <div class="stat"><div class="stat-value">6</div><div class="stat-label">Days</div></div>
+      <div class="stat"><div class="stat-value">13.2</div><div class="stat-label">Msgs/Day</div></div>
+    </div>
+
+    
+    <h2 id="section-work">What You Work On</h2>
+    <div class="project-areas">
+      
+        <div class="project-area">
+          <div class="area-header">
+            <span class="area-name">Multi-Agent Review Intelligence Pipeline</span>
+            <span class="area-count">~4 sessions</span>
+          </div>
+          <div class="area-desc">User built a multi-agent review analysis pipeline for clothing brand data, involving 18+ files and a 5-agent workflow. Claude scaffolded the full codebase but execution was repeatedly blocked by missing or insufficient API credits, requiring rewrites to generate outputs locally with synthetic data.</div>
+        </div>
+      
+        <div class="project-area">
+          <div class="area-header">
+            <span class="area-name">HTML Analytics Dashboards</span>
+            <span class="area-count">~3 sessions</span>
+          </div>
+          <div class="area-desc">User requested self-contained HTML platforms for visualizing brand analytics and review intelligence results, including dark-themed dashboards and downloadable reports. Claude built these with multi-file changes but needed several iterations to fix download bugs, layout issues, and color palette application across files.</div>
+        </div>
+      
+        <div class="project-area">
+          <div class="area-header">
+            <span class="area-name">API Credits &amp; Token Usage Inquiries</span>
+            <span class="area-count">~3 sessions</span>
+          </div>
+          <div class="area-desc">User frequently asked about available tokens, model settings, and cost estimates for large prompts. Claude lacked access to account-level information and could only provide general guidance, leading to partially achieved outcomes and some frustration.</div>
+        </div>
+      
+        <div class="project-area">
+          <div class="area-header">
+            <span class="area-name">Environment Setup &amp; Tool Installation</span>
+            <span class="area-count">~2 sessions</span>
+          </div>
+          <div class="area-desc">User attempted to install CLI tools (uipro, Claude Code) and configure API keys. Sessions were hampered by nonexistent packages and security concerns around exposed keys, resulting in unresolved outcomes.</div>
+        </div>
+      
+    </div>
+    
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">What You Wanted</div>
+        <div class="bar-row">
+        <div class="bar-label">Token Availability Inquiry</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"></div></div>
+        <div class="bar-value">3</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Debug Help</div>
+        <div class="bar-track"><div class="bar-fill" style="width:66.66666666666666%;background:#2563eb"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Bug Report Fix</div>
+        <div class="bar-track"><div class="bar-fill" style="width:66.66666666666666%;background:#2563eb"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Information Retrieval</div>
+        <div class="bar-track"><div class="bar-fill" style="width:66.66666666666666%;background:#2563eb"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Feature Integration</div>
+        <div class="bar-track"><div class="bar-fill" style="width:33.33333333333333%;background:#2563eb"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Simplify User Experience</div>
+        <div class="bar-track"><div class="bar-fill" style="width:33.33333333333333%;background:#2563eb"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top Tools Used</div>
+        <div class="bar-row">
+        <div class="bar-label">Bash</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#0891b2"></div></div>
+        <div class="bar-value">59</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Write</div>
+        <div class="bar-track"><div class="bar-fill" style="width:72.88135593220339%;background:#0891b2"></div></div>
+        <div class="bar-value">43</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Edit</div>
+        <div class="bar-track"><div class="bar-fill" style="width:67.79661016949152%;background:#0891b2"></div></div>
+        <div class="bar-value">40</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Read</div>
+        <div class="bar-track"><div class="bar-fill" style="width:18.64406779661017%;background:#0891b2"></div></div>
+        <div class="bar-value">11</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">WebFetch</div>
+        <div class="bar-track"><div class="bar-fill" style="width:3.389830508474576%;background:#0891b2"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">AskUserQuestion</div>
+        <div class="bar-track"><div class="bar-fill" style="width:1.694915254237288%;background:#0891b2"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Languages</div>
+        <div class="bar-row">
+        <div class="bar-label">Python</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#10b981"></div></div>
+        <div class="bar-value">62</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">HTML</div>
+        <div class="bar-track"><div class="bar-fill" style="width:30.64516129032258%;background:#10b981"></div></div>
+        <div class="bar-value">19</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Markdown</div>
+        <div class="bar-track"><div class="bar-fill" style="width:6.451612903225806%;background:#10b981"></div></div>
+        <div class="bar-value">4</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">JSON</div>
+        <div class="bar-track"><div class="bar-fill" style="width:3.225806451612903%;background:#10b981"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Session Types</div>
+        <div class="bar-row">
+        <div class="bar-label">Iterative Refinement</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#8b5cf6"></div></div>
+        <div class="bar-value">3</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Single Task</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#8b5cf6"></div></div>
+        <div class="bar-value">3</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Quick Question</div>
+        <div class="bar-track"><div class="bar-fill" style="width:33.33333333333333%;background:#8b5cf6"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Exploration</div>
+        <div class="bar-track"><div class="bar-fill" style="width:33.33333333333333%;background:#8b5cf6"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Multi Task</div>
+        <div class="bar-track"><div class="bar-fill" style="width:33.33333333333333%;background:#8b5cf6"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+      </div>
+    </div>
+
+    
+    <h2 id="section-usage">How You Use Claude Code</h2>
+    <div class="narrative">
+      <p>You approach Claude Code with <strong>ambitious, end-to-end project requests</strong> — frequently asking for full multi-agent pipelines, dashboards, and analytics platforms to be built from scratch in a single session. Your primary language is Python (62 tool uses) with significant HTML dashboard work (19 uses), and you rely heavily on Bash execution (59), Write (43), and Edit (40) tools, showing a pattern of <strong>building first and iterating through bugs after</strong>. Rather than providing detailed upfront specs, you tend to give a high-level vision and then course-correct as issues surface — for example, pivoting from a server-based pipeline to a pre-recorded simulation when complexity became frustrating, or going through multiple rounds of color replacements and layout reorganizations on your analytics dashboard.</p>
+<p>A striking pattern is the <strong>persistent friction with external dependencies and credentials</strong>. Across your 9 sessions, you hit API credit shortages, missing API keys, exposed keys, nonexistent npm packages, and rate limits — accounting for a significant portion of your unresolved sessions. You also repeatedly tried commands that didn&apos;t exist (like `super --analyze/--debug`), suggesting you sometimes <strong>expect tooling to work a certain way and test assumptions directly</strong> rather than reading documentation first. With 7 instances of buggy code and 6 wrong-approach frictions, your sessions often involve several fix cycles, yet you stay engaged and push through — your satisfaction skews positive (8 likely satisfied) despite the friction. You let Claude run and build extensively, with only 1 AskUserQuestion across all sessions, indicating you prefer Claude to <strong>take initiative and deliver large chunks of work</strong> that you then evaluate and redirect.</p>
+      <div class="key-insight"><strong>Key pattern:</strong> You request large, ambitious builds upfront and iterate through problems reactively, frequently blocked by credential and dependency issues rather than code logic.</div>
+    </div>
+    
+
+    <!-- Response Time Distribution -->
+    <div class="chart-card" style="margin: 24px 0;">
+      <div class="chart-title">User Response Time Distribution</div>
+      <div class="bar-row">
+        <div class="bar-label">2-10s</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:#6366f1"></div></div>
+        <div class="bar-value">0</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">10-30s</div>
+        <div class="bar-track"><div class="bar-fill" style="width:78.57142857142857%;background:#6366f1"></div></div>
+        <div class="bar-value">11</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">30s-1m</div>
+        <div class="bar-track"><div class="bar-fill" style="width:71.42857142857143%;background:#6366f1"></div></div>
+        <div class="bar-value">10</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">1-2m</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#6366f1"></div></div>
+        <div class="bar-value">14</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">2-5m</div>
+        <div class="bar-track"><div class="bar-fill" style="width:92.85714285714286%;background:#6366f1"></div></div>
+        <div class="bar-value">13</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">5-15m</div>
+        <div class="bar-track"><div class="bar-fill" style="width:35.714285714285715%;background:#6366f1"></div></div>
+        <div class="bar-value">5</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">>15m</div>
+        <div class="bar-track"><div class="bar-fill" style="width:35.714285714285715%;background:#6366f1"></div></div>
+        <div class="bar-value">5</div>
+      </div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 8px;">
+        Median: 102.5s &bull; Average: 235.8s
+      </div>
+    </div>
+
+    <!-- Multi-clauding Section (matching Python reference) -->
+    <div class="chart-card" style="margin: 24px 0;">
+      <div class="chart-title">Multi-Clauding (Parallel Sessions)</div>
+      
+        <p style="font-size: 14px; color: #64748b; padding: 8px 0;">
+          No parallel session usage detected. You typically work with one Claude Code session at a time.
+        </p>
+      
+    </div>
+
+    <!-- Time of Day & Tool Errors -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title" style="display: flex; align-items: center; gap: 12px;">
+          User Messages by Time of Day
+          <select id="timezone-select" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
+            <option value="0">PT (UTC-8)</option>
+            <option value="3">ET (UTC-5)</option>
+            <option value="8">London (UTC)</option>
+            <option value="9">CET (UTC+1)</option>
+            <option value="17">Tokyo (UTC+9)</option>
+            <option value="custom">Custom offset...</option>
+          </select>
+          <input type="number" id="custom-offset" placeholder="UTC offset" style="display: none; width: 80px; font-size: 12px; padding: 4px; border-radius: 4px; border: 1px solid #e2e8f0;">
+        </div>
+        <div id="hour-histogram">
+      <div class="bar-row">
+        <div class="bar-label">Morning (6-12)</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:#8b5cf6"></div></div>
+        <div class="bar-value">0</div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-label">Afternoon (12-18)</div>
+        <div class="bar-track"><div class="bar-fill" style="width:5.333333333333334%;background:#8b5cf6"></div></div>
+        <div class="bar-value">4</div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-label">Evening (18-24)</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#8b5cf6"></div></div>
+        <div class="bar-value">75</div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-label">Night (0-6)</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%;background:#8b5cf6"></div></div>
+        <div class="bar-value">0</div>
+      </div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tool Errors Encountered</div>
+        <div class="bar-row">
+        <div class="bar-label">Command Failed</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#dc2626"></div></div>
+        <div class="bar-value">11</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">User Rejected</div>
+        <div class="bar-track"><div class="bar-fill" style="width:9.090909090909092%;background:#dc2626"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Edit Failed</div>
+        <div class="bar-track"><div class="bar-fill" style="width:9.090909090909092%;background:#dc2626"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">File Not Found</div>
+        <div class="bar-track"><div class="bar-fill" style="width:9.090909090909092%;background:#dc2626"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+      </div>
+    </div>
+
+    
+    <h2 id="section-wins">Impressive Things You Did</h2>
+    <p class="section-intro">Over 9 sessions you&apos;ve been intensively building a multi-agent review intelligence platform in Python and HTML, pushing through API and credit limitations with creative workarounds.</p>
+    <div class="big-wins">
+      
+        <div class="big-win">
+          <div class="big-win-title">Building Complex Multi-File Pipelines</div>
+          <div class="big-win-desc">You&apos;ve consistently tackled ambitious, multi-file architectures — including an 18-file multi-agent review analysis pipeline built from a single master prompt. Your willingness to scope out large systems and have Claude scaffold the entire structure shows strong architectural thinking.</div>
+        </div>
+      
+        <div class="big-win">
+          <div class="big-win-title">Adapting Around API Limitations</div>
+          <div class="big-win-desc">When API credit shortages and rate limits blocked your pipeline execution, you pivoted to local synthetic data generation and pre-recorded simulation approaches. This resourcefulness kept your projects moving forward despite external blockers that would have stalled many users.</div>
+        </div>
+      
+        <div class="big-win">
+          <div class="big-win-title">Iterative Dashboard Refinement</div>
+          <div class="big-win-desc">You built self-contained HTML analytics dashboards from scratch and iterated on layout, color palettes, and visual elements until they matched your vision. Your attention to presentation quality — dark themes, brand-specific data, download functionality — shows you&apos;re building polished end products, not just prototypes.</div>
+        </div>
+      
+    </div>
+    
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">What Helped Most (Claude's Capabilities)</div>
+        <div class="bar-row">
+        <div class="bar-label">Multi-file Changes</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#16a34a"></div></div>
+        <div class="bar-value">5</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Good Explanations</div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%;background:#16a34a"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Good Debugging</div>
+        <div class="bar-track"><div class="bar-fill" style="width:20%;background:#16a34a"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Outcomes</div>
+        <div class="bar-row">
+        <div class="bar-label">Not Achieved</div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%;background:#8b5cf6"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Partially Achieved</div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%;background:#8b5cf6"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Mostly Achieved</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#8b5cf6"></div></div>
+        <div class="bar-value">5</div>
+      </div>
+      </div>
+    </div>
+
+    
+    <h2 id="section-friction">Where Things Go Wrong</h2>
+    <p class="section-intro">Your sessions are heavily impacted by API credit and credential issues, buggy generated code requiring multiple fix cycles, and repeated attempts to use nonexistent commands or packages.</p>
+    <div class="friction-categories">
+      
+        <div class="friction-category">
+          <div class="friction-title">API Credits and Credential Management</div>
+          <div class="friction-desc">You repeatedly hit blockers around missing or underfunded API keys, preventing pipelines from ever executing. Setting up credentials and verifying credit balances before starting complex builds would save significant time.</div>
+          <ul class="friction-examples"><li>Your multi-agent review pipeline was fully built (18 files) but never ran because API keys were missing or had insufficient credits across both Anthropic and OpenRouter</li><li>You pasted an API key directly in chat, triggering a security warning that derailed the setup session entirely</li></ul>
+        </div>
+      
+        <div class="friction-category">
+          <div class="friction-title">Buggy Generated Code Requiring Multiple Fix Rounds</div>
+          <div class="friction-desc">Code produced by Claude frequently had bugs—missing variables, broken downloads, incorrect data distributions—leading to frustrating iteration loops. Providing test cases or asking Claude to validate outputs before moving on could reduce these cycles.</div>
+          <ul class="friction-examples"><li>Dashboard fallback implementations had missing variables, insufficient brand coverage, and empty phases, requiring several rounds of back-and-forth fixes</li><li>The synthetic data generator needed multiple fixes for tag frequency distribution, and a Word download feature was broken on first delivery</li></ul>
+        </div>
+      
+        <div class="friction-category">
+          <div class="friction-title">Using Nonexistent Commands and Packages</div>
+          <div class="friction-desc">You repeatedly tried commands and packages that don&apos;t exist, wasting time before Claude could redirect you. Verifying tool availability before committing to a workflow would help avoid dead ends.</div>
+          <ul class="friction-examples"><li>You tried installing &apos;uipro&apos; from npm multiple times, but the package doesn&apos;t exist and the session ended unresolved</li><li>You repeatedly attempted nonexistent &apos;super --analyze/--debug&apos; commands that Claude had to correct each time</li></ul>
+        </div>
+      
+    </div>
+    
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Primary Friction Types</div>
+        <div class="bar-row">
+        <div class="bar-label">Buggy Code</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#dc2626"></div></div>
+        <div class="bar-value">7</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Wrong Approach</div>
+        <div class="bar-track"><div class="bar-fill" style="width:85.71428571428571%;background:#dc2626"></div></div>
+        <div class="bar-value">6</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Misunderstood Request</div>
+        <div class="bar-track"><div class="bar-fill" style="width:42.857142857142854%;background:#dc2626"></div></div>
+        <div class="bar-value">3</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">External Blocker</div>
+        <div class="bar-track"><div class="bar-fill" style="width:42.857142857142854%;background:#dc2626"></div></div>
+        <div class="bar-value">3</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Tool Limitation</div>
+        <div class="bar-track"><div class="bar-fill" style="width:28.57142857142857%;background:#dc2626"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">External Dependency Failure</div>
+        <div class="bar-track"><div class="bar-fill" style="width:14.285714285714285%;background:#dc2626"></div></div>
+        <div class="bar-value">1</div>
+      </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Inferred Satisfaction (model-estimated)</div>
+        <div class="bar-row">
+        <div class="bar-label">Frustrated</div>
+        <div class="bar-track"><div class="bar-fill" style="width:25%;background:#eab308"></div></div>
+        <div class="bar-value">2</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Dissatisfied</div>
+        <div class="bar-track"><div class="bar-fill" style="width:37.5%;background:#eab308"></div></div>
+        <div class="bar-value">3</div>
+      </div>
+<div class="bar-row">
+        <div class="bar-label">Likely Satisfied</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#eab308"></div></div>
+        <div class="bar-value">8</div>
+      </div>
+      </div>
+    </div>
+
+    
+    
+    <h2 id="section-features">Existing CC Features to Try</h2>
+    <div class="claude-md-section">
+      <h3>Suggested CLAUDE.md Additions</h3>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Just copy this into Claude Code to add it to your CLAUDE.md.</p>
+      <div class="claude-md-actions">
+        <button class="copy-all-btn" onclick="copyAllCheckedClaudeMd()">Copy All Checked</button>
+      </div>
+      
+        <div class="claude-md-item">
+          <input type="checkbox" id="cmd-0" class="cmd-checkbox" checked data-text="Add under a ## Architecture Principles section at the top of CLAUDE.md\n\nWhen building pipelines or multi-agent systems, ALWAYS design them to work offline/locally first with synthetic data before attempting any API calls. Only add live API integration as an optional second step.">
+          <label for="cmd-0">
+            <code class="cmd-code">When building pipelines or multi-agent systems, ALWAYS design them to work offline/locally first with synthetic data before attempting any API calls. Only add live API integration as an optional second step.</code>
+            <button class="copy-btn" onclick="copyCmdItem(0)">Copy</button>
+          </label>
+          <div class="cmd-why">Multiple sessions (4+) failed or stalled due to missing API keys, insufficient credits, or rate limits - local-first design would have avoided most friction.</div>
+        </div>
+      
+        <div class="claude-md-item">
+          <input type="checkbox" id="cmd-1" class="cmd-checkbox" checked data-text="Add under a ## General Rules section in CLAUDE.md\n\nBefore suggesting CLI commands or tools, verify they exist. Never suggest commands like &apos;super --analyze&apos; or packages like &apos;uipro&apos; without confirming availability first. If unsure, say so.">
+          <label for="cmd-1">
+            <code class="cmd-code">Before suggesting CLI commands or tools, verify they exist. Never suggest commands like &apos;super --analyze&apos; or packages like &apos;uipro&apos; without confirming availability first. If unsure, say so.</code>
+            <button class="copy-btn" onclick="copyCmdItem(1)">Copy</button>
+          </label>
+          <div class="cmd-why">Multiple sessions had friction from nonexistent commands and packages that Claude suggested or couldn&apos;t correct quickly.</div>
+        </div>
+      
+        <div class="claude-md-item">
+          <input type="checkbox" id="cmd-2" class="cmd-checkbox" checked data-text="Add under a ## Tech Stack section in CLAUDE.md\n\nThis project primarily uses Python (with HTML dashboards). Always use Python for backend/pipeline work. For dashboards, build self-contained HTML files with inline CSS/JS - no server dependencies unless explicitly requested.">
+          <label for="cmd-2">
+            <code class="cmd-code">This project primarily uses Python (with HTML dashboards). Always use Python for backend/pipeline work. For dashboards, build self-contained HTML files with inline CSS/JS - no server dependencies unless explicitly requested.</code>
+            <button class="copy-btn" onclick="copyCmdItem(2)">Copy</button>
+          </label>
+          <div class="cmd-why">User consistently builds Python pipelines with HTML dashboards and was frustrated when server-based approaches added complexity.</div>
+        </div>
+      
+        <div class="claude-md-item">
+          <input type="checkbox" id="cmd-3" class="cmd-checkbox" checked data-text="Add under a ## Security section in CLAUDE.md\n\nNever echo or store API keys that appear in chat. Immediately warn the user and suggest using environment variables (e.g., `export ANTHROPIC_API_KEY=...` in shell, or a `.env` file with python-dotenv).">
+          <label for="cmd-3">
+            <code class="cmd-code">Never echo or store API keys that appear in chat. Immediately warn the user and suggest using environment variables (e.g., `export ANTHROPIC_API_KEY=...` in shell, or a `.env` file with python-dotenv).</code>
+            <button class="copy-btn" onclick="copyCmdItem(3)">Copy</button>
+          </label>
+          <div class="cmd-why">A session involved a user pasting an API key directly in chat, creating a security risk.</div>
+        </div>
+      
+    </div>
+    
+    
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Just copy this into Claude Code and it'll set it up for you.</p>
+    <div class="features-section">
+      
+        <div class="feature-card">
+          <div class="feature-title">Custom Skills</div>
+          <div class="feature-oneliner">Reusable prompts for repetitive workflows triggered by a single /command.</div>
+          <div class="feature-why"><strong>Why for you:</strong> You repeatedly build multi-agent pipelines with HTML dashboards - a /pipeline skill could scaffold all 15-18 files with local-first synthetic data in one command, avoiding the repeated setup friction.</div>
+          
+          <div class="feature-examples">
+            <div class="feature-example">
+              <div class="example-code-row">
+                <code class="example-code">mkdir -p .claude/skills/pipeline &amp;&amp; cat &gt; .claude/skills/pipeline/SKILL.md &lt;&lt; &apos;EOF&apos;
+# Pipeline Scaffold
+Build a multi-agent Python pipeline with:
+1. Synthetic data generator (no API calls)
+2. Agent modules in agents/ directory
+3. Self-contained HTML dashboard with dark theme
+4. Main orchestrator with --local flag default
+5. requirements.txt
+Always generate working sample output on first run.
+EOF</code>
+                <button class="copy-btn" onclick="copyText(this)">Copy</button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      
+        <div class="feature-card">
+          <div class="feature-title">Hooks</div>
+          <div class="feature-oneliner">Auto-run shell commands at specific lifecycle events.</div>
+          <div class="feature-why"><strong>Why for you:</strong> 7 sessions had buggy code friction - a hook that auto-runs `python -m py_compile` on saved Python files would catch syntax errors immediately before you discover them manually.</div>
+          
+          <div class="feature-examples">
+            <div class="feature-example">
+              <div class="example-code-row">
+                <code class="example-code"># Add to .claude/settings.json:
+{
+  &quot;hooks&quot;: {
+    &quot;postEdit&quot;: {
+      &quot;command&quot;: &quot;for f in $(echo $EDITED_FILES | tr &apos;,&apos; &apos;\n&apos; | grep &apos;\.py$&apos;); do python -m py_compile \&quot;$f\&quot; 2&gt;&amp;1 || echo \&quot;SYNTAX ERROR in $f\&quot;; done&quot;
+    }
+  }
+}</code>
+                <button class="copy-btn" onclick="copyText(this)">Copy</button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      
+        <div class="feature-card">
+          <div class="feature-title">Task Agents</div>
+          <div class="feature-oneliner">Spawns focused sub-agents for parallel exploration work.</div>
+          <div class="feature-why"><strong>Why for you:</strong> You build 15-18 file pipelines where bugs cascade across files - asking Claude to &apos;use an agent to validate all pipeline files can import and run&apos; would catch integration issues across your multi-file systems faster.</div>
+          
+          <div class="feature-examples">
+            <div class="feature-example">
+              <div class="example-code-row">
+                <code class="example-code">Use this prompt: &quot;Spawn an agent to review all Python files in this project, verify imports resolve, check for undefined variables, and report any issues before I try to run the pipeline.&quot;</code>
+                <button class="copy-btn" onclick="copyText(this)">Copy</button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      
+    </div>
+    
+    
+    <h2 id="section-patterns">New Ways to Use Claude Code</h2>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Just copy this into Claude Code and it'll walk you through it.</p>
+    <div class="patterns-section">
+      
+        <div class="pattern-card">
+          <div class="pattern-title">Design for offline-first, always</div>
+          <div class="pattern-summary">Start every pipeline build with synthetic/mock data and local execution before adding any API dependencies.</div>
+          <div class="pattern-detail">At least 4 of your 9 sessions hit API credit, key, or rate limit blockers that prevented you from seeing your pipeline run at all. By generating realistic synthetic data first, you can validate the entire flow end-to-end, then swap in real API calls later. This also makes your dashboards immediately demonstrable.</div>
+          
+          <div class="copyable-prompt-section">
+            <div class="prompt-label">Paste into Claude Code:</div>
+            <div class="copyable-prompt-row">
+              <code class="copyable-prompt">Build a multi-agent review analysis pipeline that runs 100% locally with synthetic data. Generate realistic fake reviews, run all agents on local data, and produce a working HTML dashboard. Do NOT use any external APIs - everything must work on first run.</code>
+              <button class="copy-btn" onclick="copyText(this)">Copy</button>
+            </div>
+          </div>
+          
+        </div>
+      
+        <div class="pattern-card">
+          <div class="pattern-title">Ask for complete validation before ending sessions</div>
+          <div class="pattern-summary">Always request a full dry-run or smoke test before wrapping up a build session.</div>
+          <div class="pattern-detail">Several sessions produced all the files but ended without confirming they actually work together. With 7 instances of buggy code friction and multiple rounds of fixes, asking Claude to run a validation pass would surface issues while you still have context. This is especially important for your 15+ file pipeline projects.</div>
+          
+          <div class="copyable-prompt-section">
+            <div class="prompt-label">Paste into Claude Code:</div>
+            <div class="copyable-prompt-row">
+              <code class="copyable-prompt">Before we finish: run python main.py with the --local flag, check the output for errors, verify the HTML dashboard renders valid data, and fix anything broken. Show me the final output.</code>
+              <button class="copy-btn" onclick="copyText(this)">Copy</button>
+            </div>
+          </div>
+          
+        </div>
+      
+        <div class="pattern-card">
+          <div class="pattern-title">Bundle dashboard requirements upfront</div>
+          <div class="pattern-summary">Specify all visual and layout requirements (dark theme, color palette, section priority) in your initial prompt.</div>
+          <div class="pattern-detail">Multiple sessions needed extra iterations to fix colors, reorganize layouts, and adjust visual elements after the initial build. Since you consistently want dark-themed dashboards with specific data priorities, front-loading these requirements saves 2-3 rounds of back-and-forth per session. Consider putting these defaults in your CLAUDE.md so you never have to repeat them.</div>
+          
+          <div class="copyable-prompt-section">
+            <div class="prompt-label">Paste into Claude Code:</div>
+            <div class="copyable-prompt-row">
+              <code class="copyable-prompt">Build an HTML analytics dashboard with: dark color palette (#1a1a2e background, #16213e cards, #0f3460 accents, #e94560 highlights), data/recommendations sections FIRST before any architecture diagrams, and a working Word/PDF download button. Make it fully self-contained with inline CSS and JS.</code>
+              <button class="copy-btn" onclick="copyText(this)">Copy</button>
+            </div>
+          </div>
+          
+        </div>
+      
+    </div>
+    
+    
+
+    
+    <h2 id="section-horizon">On the Horizon</h2>
+    <p class="section-intro">Your sessions reveal a pattern of ambitious multi-agent pipeline builds getting derailed by credential issues and buggy iterations—problems that autonomous, test-driven workflows can eliminate.</p>
+    <div class="horizon-section">
+      
+        <div class="horizon-card">
+          <div class="horizon-title">Self-Validating Pipeline Builds With Test Harnesses</div>
+          <div class="horizon-possible">Instead of building 18 files then discovering they fail at runtime, Claude can generate tests alongside each module and iterate against them autonomously. This catches missing variables, broken fallbacks, and data distribution bugs before you ever hit &apos;run&apos;—eliminating the 7 buggy-code friction events you experienced.</div>
+          <div class="horizon-tip"><strong>Getting started:</strong> Use Claude Code with a test-first prompt pattern. Ask it to write pytest tests for each agent module first, then implement until all tests pass.</div>
+          <div class="pattern-prompt"><div class="prompt-label">Paste into Claude Code:</div><code>Build a multi-agent review analysis pipeline with 5 agents. For EACH agent module: 1) First write a pytest test file that validates inputs, outputs, error handling, and edge cases (empty data, missing keys, API failures). 2) Then implement the module. 3) Run pytest after each module and fix until all tests pass before moving to the next agent. 4) Include an integration test that runs the full pipeline with synthetic data and asserts the final dashboard output is valid HTML with all expected sections. Do not move on from any module until its tests are green.</code><button class="copy-btn" onclick="copyText(this)">Copy</button></div>
+        </div>
+      
+        <div class="horizon-card">
+          <div class="horizon-title">Offline-First Pipelines That Never Need Credits</div>
+          <div class="horizon-possible">Multiple sessions stalled because of missing API keys or insufficient credits. You can architect pipelines that run entirely locally with synthetic data generation and local LLM fallbacks, making the demo-to-production path seamless. The pipeline works immediately, and swapping in real APIs becomes a one-line config change.</div>
+          <div class="horizon-tip"><strong>Getting started:</strong> Prompt Claude Code to build with a local-first architecture using environment variable detection to automatically switch between real and synthetic modes.</div>
+          <div class="pattern-prompt"><div class="prompt-label">Paste into Claude Code:</div><code>Build a Python review intelligence pipeline with this architecture: 1) A config.py that checks for ANTHROPIC_API_KEY and OPENROUTER_API_KEY env vars. If missing, automatically enable LOCAL_MODE. 2) In LOCAL_MODE, each agent uses a synthetic data generator that produces realistic outputs matching the exact schema the real API would return. 3) A single .env.example file documenting all optional keys. 4) The HTML dashboard renders identically regardless of mode, with a small badge showing &apos;synthetic&apos; or &apos;live&apos;. 5) Run the full pipeline end-to-end in local mode and verify the dashboard opens correctly. Target: zero external dependencies needed to see a working demo.</code><button class="copy-btn" onclick="copyText(this)">Copy</button></div>
+        </div>
+      
+        <div class="horizon-card">
+          <div class="horizon-title">Parallel Sub-Agents For Complex Multi-File Projects</div>
+          <div class="horizon-possible">You&apos;ve only used the Agent tool once, but your projects involve 10-18 interconnected files across Python and HTML. Spawning parallel sub-agents—one for backend pipeline logic, one for dashboard HTML/CSS, one for data validation—can cut build time dramatically and reduce the iterative back-and-forth that caused wrong-approach friction in 6 sessions.</div>
+          <div class="horizon-tip"><strong>Getting started:</strong> Use Claude Code&apos;s Agent tool to delegate distinct workstreams, with a master agent coordinating shared interfaces and running integration checks.</div>
+          <div class="pattern-prompt"><div class="prompt-label">Paste into Claude Code:</div><code>You are the orchestrator for a review intelligence platform. Use sub-agents to parallelize the work:
+
+Agent 1 - Data Layer: Build synthetic_data.py (generates realistic review datasets for 5 clothing brands with proper tag distributions), models.py (Pydantic schemas for all data flowing between agents), and pipeline.py (orchestrates the 5-agent workflow).
+
+Agent 2 - Dashboard: Build dashboard.html with a dark theme (#0a0a0f background, #00e5ff accents), responsive grid layout showing brand scores, sentiment charts, and recommendation cards. Use Chart.js loaded from CDN. Read the Pydantic schemas from models.py to ensure the HTML template variables match exactly.
+
+Agent 3 - Quality Gate: After both agents finish, run the full pipeline, validate the HTML output contains all expected sections, check that no variables are undefined, and run any pytest tests. Report any mismatches between the data layer output and dashboard expectations.
+
+Coordinate all three and do not consider the task done until Agent 3 confirms everything passes.</code><button class="copy-btn" onclick="copyText(this)">Copy</button></div>
+        </div>
+      
+    </div>
+    
+
+    
+    <div class="fun-ending">
+      <div class="fun-headline">"User pasted their API key directly into the chat and Claude had to stop everything to deliver a security intervention instead of actually helping"</div>
+      <div class="fun-detail">During a session where the user was trying to set up Claude Code, they pasted their raw API key right into the conversation. Claude had to pivot from helpful assistant to security guard, warning them about the exposed credential — and the session never recovered from there.</div>
+    </div>
+    
+
+    
+  </div>
+  <script>
+    function toggleCollapsible(header) {
+      header.classList.toggle('open');
+      const content = header.nextElementSibling;
+      content.classList.toggle('open');
+    }
+    function copyText(btn) {
+      const code = btn.previousElementSibling;
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+    function copyCmdItem(idx) {
+      const checkbox = document.getElementById('cmd-' + idx);
+      if (checkbox) {
+        const text = checkbox.dataset.text;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = checkbox.nextElementSibling.querySelector('.copy-btn');
+          if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+        });
+      }
+    }
+    function copyAllCheckedClaudeMd() {
+      const checkboxes = document.querySelectorAll('.cmd-checkbox:checked');
+      const texts = [];
+      checkboxes.forEach(cb => {
+        if (cb.dataset.text) { texts.push(cb.dataset.text); }
+      });
+      const combined = texts.join('\n');
+      const btn = document.querySelector('.copy-all-btn');
+      if (btn) {
+        navigator.clipboard.writeText(combined).then(() => {
+          btn.textContent = 'Copied ' + texts.length + ' items!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy All Checked'; btn.classList.remove('copied'); }, 2000);
+        });
+      }
+    }
+    // Timezone selector for time of day chart (data is from our own analytics, not user input)
+    const rawHourCounts = {"16":4,"18":6,"19":3,"20":26,"21":4,"22":26,"23":10};
+    function updateHourHistogram(offsetFromPT) {
+      const periods = [
+        { label: "Morning (6-12)", range: [6,7,8,9,10,11] },
+        { label: "Afternoon (12-18)", range: [12,13,14,15,16,17] },
+        { label: "Evening (18-24)", range: [18,19,20,21,22,23] },
+        { label: "Night (0-6)", range: [0,1,2,3,4,5] }
+      ];
+      const adjustedCounts = {};
+      for (const [hour, count] of Object.entries(rawHourCounts)) {
+        const newHour = (parseInt(hour) + offsetFromPT + 24) % 24;
+        adjustedCounts[newHour] = (adjustedCounts[newHour] || 0) + count;
+      }
+      const periodCounts = periods.map(p => ({
+        label: p.label,
+        count: p.range.reduce((sum, h) => sum + (adjustedCounts[h] || 0), 0)
+      }));
+      const maxCount = Math.max(...periodCounts.map(p => p.count)) || 1;
+      const container = document.getElementById('hour-histogram');
+      container.textContent = '';
+      periodCounts.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        const label = document.createElement('div');
+        label.className = 'bar-label';
+        label.textContent = p.label;
+        const track = document.createElement('div');
+        track.className = 'bar-track';
+        const fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        fill.style.width = (p.count / maxCount) * 100 + '%';
+        fill.style.background = '#8b5cf6';
+        track.appendChild(fill);
+        const value = document.createElement('div');
+        value.className = 'bar-value';
+        value.textContent = p.count;
+        row.appendChild(label);
+        row.appendChild(track);
+        row.appendChild(value);
+        container.appendChild(row);
+      });
+    }
+    document.getElementById('timezone-select').addEventListener('change', function() {
+      const customInput = document.getElementById('custom-offset');
+      if (this.value === 'custom') {
+        customInput.style.display = 'inline-block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+        updateHourHistogram(parseInt(this.value));
+      }
+    });
+    document.getElementById('custom-offset').addEventListener('change', function() {
+      const offset = parseInt(this.value) + 8;
+      updateHourHistogram(offset);
+    });
+  </script>
+</body>
+</html>

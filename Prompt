@@ -1,0 +1,304 @@
+PROMPT:
+Give me a complete multi-deliverable output for a fictional consulting company called Kaizen, an e-commerce consulting firm.
+
+You work at Kaizen and have strong expertise in data-driven analysis, customer engagement and customer experience, Kaizen methodology, front-end development, back-end thinking, and operational decision-making.
+
+Your task is to build and demonstrate a fully agentic organization that analyzes sportswear and footwear e-commerce performance across multiple brands and turns findings into decision-ready operational recommendations.
+
+IMPORTANT CONTEXT:
+This is a CLOSED DEMO, not a live enterprise product.
+Do NOT connect to a real database.
+Do NOT claim direct access to private enterprise systems.
+Instead, create a realistic, source-grounded closed demo using:
+1. public sources and public datasets for real review/rating/e-commerce evidence patterns, and
+2. a plausibility-grounded synthetic dataset for transactions, return reasons, and operational issues used inside the demo.
+
+INDUSTRY SCOPE:
+The demo must focus specifically on sportswear and footwear.
+Prioritize product attributes and failure modes that are realistic in this category, such as:
+- size accuracy,
+- fit,
+- comfort,
+- cushioning,
+- arch support,
+- breathability,
+- stitching quality,
+- sole durability,
+- outsole grip/traction,
+- material quality,
+- color mismatch,
+- shrinkage,
+- product description mismatch,
+- return friction.
+
+CORE DELIVERABLES:
+Generate all of the following real deliverables:
+
+DELIVERABLE 1:
+One single self-contained HTML file with embedded CSS and JavaScript only.
+This file must be a polished, trustworthy, decision-ready demo platform for Kaizen.
+
+DELIVERABLE 2:
+One real Word report file, 1–2 pages maximum, business English, generated locally as a separate deliverable.
+This report must document the entire 5-agent workflow for compliance and executive review.
+
+DELIVERABLE 3:
+One real Excel file from the Researcher agent.
+
+DELIVERABLE 4:
+One real PowerPoint file from the Designer agent.
+
+DELIVERABLE 5:
+One real Excel file from the Maker agent.
+
+DELIVERABLE 6:
+One real PowerPoint file from the Communicator agent.
+
+DELIVERABLE 7:
+One real Word file from the Manager agent.
+
+Every deliverable must be actually generated as a local file, not merely described.
+
+CRITICAL TRUTHFULNESS RULE:
+Never present simulated transactions, synthetic return reasons, derived KPIs, product incidents, or generated records as if they were real first-party business data.
+You must clearly label:
+- what is REAL EXTERNAL EVIDENCE,
+- what is SYNTHETIC DEMO DATA,
+- what is HEURISTIC ESTIMATION,
+- what is INFERENCE.
+
+DATA REQUIREMENTS:
+The demo must simulate analysis of at least 4,000 transactions.
+The synthetic dataset must feel realistic and internally consistent, grounded in patterns inferred from public review/rating sources and public sportswear/footwear e-commerce datasets.
+Allowed evidence types:
+- public product reviews,
+- public ratings,
+- public review excerpts,
+- public return-reason patterns,
+- public dataset references,
+- synthetic transaction records,
+- synthetic return events,
+- synthetic operational tickets.
+
+Do not fabricate fake citations.
+Do not invent nonexistent papers, websites, or datasets.
+Do not invent “real customer quotes” unless they are explicitly labeled as synthesized summaries.
+If you use review excerpts, label them as either:
+- “verbatim public excerpt,” or
+- “synthesized issue summary derived from multiple public reviews.”
+
+PLATFORM REQUIREMENTS:
+Create a visually polished, trustworthy HTML platform that supports operational decision-making for teams in:
+- Operations,
+- Customer Experience,
+- Product Quality,
+- Returns.
+
+The platform must help them identify:
+- which product or service qualities are failing,
+- which brands or product families are most affected,
+- what action should be taken,
+- what business impact can be expected.
+
+The interface must reveal detail progressively only when requested.
+Use UX patterns such as:
+- accordions,
+- drill-down panels,
+- drawers,
+- layered cards,
+- expand/collapse sections,
+- evidence panels.
+
+The platform must look executive-ready, modern, credible, and useful for real action-taking.
+
+RECOMMENDATION ENGINE REQUIREMENTS:
+Each recommendation must include all of the following:
+1. exact product or model name,
+2. failing attribute,
+3. business reason behind the recommendation,
+4. supporting evidence,
+5. estimated impact on returns, ratings, recommendations, and sales,
+6. expected timeline in weeks or months,
+7. one concrete operational action inside the platform.
+
+Allowed operational actions include:
+- Assign to Product Quality Team
+- Send to Returns Team
+- Create Improvement Ticket
+- Escalate to Brand Manager
+- Update Product Detail Page
+- Review Sizing Guide
+- Trigger CX Follow-up
+
+ESTIMATION RULES:
+All impact estimates must be heuristic and clearly explained.
+Do not imply causal certainty.
+For every estimate, show:
+- assumptions,
+- confidence level,
+- scenario type (conservative / base / aggressive),
+- why that estimate is reasonable.
+
+5-AGENT ORGANIZATION:
+Build a fully agentic workflow with exactly 5 specialized AI agents:
+1. Researcher
+2. Designer
+3. Maker
+4. Communicator
+5. Manager
+
+Each agent must have:
+- a real full name,
+- a believable personality,
+- domain expertise inspired by realistic professional backgrounds,
+- its own SYSTEM PROMPT,
+- explicit responsibilities,
+- explicit inputs,
+- explicit outputs,
+- acceptance criteria,
+- handoff protocol to the next agent.
+
+Do not use celebrity identities or actual living individuals as if they were participating.
+Create original fictional professionals inspired by real-world roles.
+
+The handoff is the heart of the project.
+The agents must visibly pass work from one to the next in a disciplined pipeline.
+This is not a report about AI. This is AI working.
+
+MANDATORY AGENT-SPECIFIC FILE OUTPUTS:
+Each agent must produce one primary file deliverable that reflects its actual work.
+
+Researcher Agent:
+Must generate one Excel workbook.
+The workbook must include:
+- source inventory,
+- review/rating evidence registry,
+- issue taxonomy,
+- brand/product/attribute mapping,
+- return-reason pattern table,
+- evidence confidence notes,
+- source traceability fields.
+
+Designer Agent:
+Must generate one PowerPoint presentation.
+The deck must include:
+- product vision,
+- user roles,
+- decision-flow design,
+- UX architecture,
+- information hierarchy,
+- trust/governance UX patterns,
+- wireframe-level layouts,
+- drill-down logic,
+- evidence disclosure design.
+
+Maker Agent:
+Must generate one Excel workbook.
+The workbook must include:
+- synthetic transaction dataset with at least 4,000 rows,
+- synthetic returns dataset,
+- field dictionary,
+- KPI logic tabs,
+- issue clustering logic,
+- recommendation logic,
+- heuristic estimation model structure,
+- validation checks.
+
+Communicator Agent:
+Must generate one PowerPoint presentation.
+The deck must include:
+- stakeholder-ready narrative,
+- executive storyline,
+- business problem framing,
+- top insights,
+- priority recommendations,
+- expected business outcomes,
+- team-specific talking points,
+- rollout messaging.
+
+Manager Agent:
+Must generate one Word report file.
+This file must include:
+- executive summary,
+- summary of each agent’s work,
+- summary of all handoffs,
+- grading of each agent out of 100,
+- what each agent did well,
+- what each agent could have done better,
+- overall workflow alignment assessment,
+- final workflow score out of 100,
+- governance and compliance summary.
+
+HANDOFF REQUIREMENTS:
+Each agent must produce a structured handoff packet that includes:
+- completed work,
+- unresolved risks,
+- evidence used,
+- source references,
+- assumptions,
+- confidence notes,
+- next-step instructions for the receiving agent.
+
+The Manager must receive all handoff packets and summarize the full chain of work.
+
+WORD REPORT REQUIREMENTS:
+In addition to the Manager’s Word report, also generate the separate compliance/executive Word report requested above if needed, but avoid duplication by making the Manager’s file serve both purposes whenever possible.
+
+CITATION AND SOURCE RULES:
+Every agent must cite all sources used and pass them forward to the Manager.
+Use short-link style references or compact source labels.
+The platform must expose source traceability without overwhelming the user.
+The Word report must contain a compact source appendix or source list.
+
+TRUST, VALIDATION, AND GOVERNANCE:
+Make the platform trustworthy through:
+- source traceability,
+- evidence labeling,
+- synthetic-data disclosure,
+- confidence labels,
+- transparent validation messages,
+- audit-style action history,
+- human review checkpoints before operational action,
+- role-based governance language,
+- compliance-aware messaging.
+
+The platform and reports must explicitly reflect principles aligned with GDPR and the EU AI Act, including:
+- transparency,
+- purpose limitation,
+- data minimization,
+- human oversight,
+- clear disclosure of AI-generated analysis,
+- non-deceptive UX,
+- governance and accountability language.
+
+TECHNICAL OUTPUT RULES:
+For the HTML deliverable:
+- output one single self-contained HTML file only,
+- embed all CSS and JS,
+- no external frameworks required,
+- no broken placeholders,
+- no fake backend claims,
+- include demo data directly inside the file.
+
+For the Excel deliverables:
+- generate real local workbook files,
+- structure sheets clearly,
+- use business-ready labels,
+- include a data dictionary where relevant.
+
+For the PowerPoint deliverables:
+- generate real local presentation files,
+- use clean consulting-style slides,
+- use concise business English,
+- avoid filler and decorative slides.
+
+For the Word deliverables:
+- generate real local files,
+- business-ready formatting,
+- concise but concrete,
+- no filler.
+
+FINAL QUALITY BAR:
+The result must feel like a credible consulting demo that a stakeholder could open and immediately understand.
+It must be useful for action-taking, visually polished, operationally grounded, and honest about what is real, synthetic, inferred, and estimated.
+All agent outputs must be tangible, file-based, and consistent with their role in the workflow.
